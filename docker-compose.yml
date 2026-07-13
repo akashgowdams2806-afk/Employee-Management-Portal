@@ -8,8 +8,15 @@ services:
       MYSQL_USER: admin
       MYSQL_PASSWORD: admin123
       MYSQL_ROOT_PASSWORD: root123
+    ports:
+      - "3307:3306"
     volumes:
       - employee_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot123"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   employee-app:
     image: akashms54/employee-app:latest
@@ -21,7 +28,8 @@ services:
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin123
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
 
 volumes:
   employee_mysql_data:
